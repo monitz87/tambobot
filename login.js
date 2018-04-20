@@ -95,11 +95,11 @@ const connectAndWriteSheet = function (sheetName) {
             return;
           }
 
-          client.deleteMessage(message.UID, function (err) {
-            if (err) {
-              return logErr(err);
-            }
-          });
+          // client.deleteMessage(message.UID, function (err) {
+          //   if (err) {
+          //     return logErr(err);
+          //   }
+          // });
 
           const stream = client.createMessageStream(message.UID);
           const gettingContent = streamToString(stream)
@@ -206,10 +206,14 @@ const connectAndWriteSheet = function (sheetName) {
   client.connect();
 };
 
-later.setInterval(function () {
-  connectAndWriteSheet(`L-J ${moment.utc().subtract(3, 'h').format('DD/MM/YYYY')}`)
-}, monThroughThu);
+// later.setInterval(function () {
+//   connectAndWriteSheet(`L-J ${moment.utc().subtract(3, 'h').format('DD/MM/YYYY')}`)
+// }, monThroughThu);
 
-later.setInterval(function () {
-  connectAndWriteSheet(`FDS ${moment.utc().subtract(3, 'h').format('DD/MM/YYYY')}`)
-}, weekend);
+// later.setInterval(function () {
+//   connectAndWriteSheet(`FDS ${moment.utc().subtract(3, 'h').format('DD/MM/YYYY')}`)
+// }, weekend);
+
+later.setTimeout(function () {
+  connectAndWriteSheet(`L-J ${moment.utc().subtract(3, 'h').format('DD/MM/YYYY')}`)
+}, testSched);
