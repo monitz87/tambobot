@@ -154,7 +154,7 @@ const connectAndWriteSheet = function (sheetName) {
               headers: ['Local', 'Venta']
             }, function (err, sheet) {
               if (err) {
-                logErr(err);
+                return logErr(err);
               }
 
               const row = {};
