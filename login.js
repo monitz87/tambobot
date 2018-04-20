@@ -44,8 +44,8 @@ const weekend = later.parse.text('at 10:00 am on Mon');
 const testSched = later.parse.text('every 2 minutes');
 
 const connectAndWriteSheet = function (sheetName) {
-  const logErr = function (err) {
-    console.error(`Error para "${sheetName}":`);
+  const logErr = function (type, err) {
+    console.error(`${type} error para "${sheetName}":`);
     console.error(err);
   };
 
@@ -60,7 +60,7 @@ const connectAndWriteSheet = function (sheetName) {
       });
 
       stream.on('error', function (err) {
-        logErr(err);
+        logErr('stream', err);
       });
     });
 
@@ -83,23 +83,18 @@ const connectAndWriteSheet = function (sheetName) {
     const nacional = {};
     client.openMailbox('INBOX', function (err, info) {
       if (err) {
-        return logErr(err);
+        return logErr('mailbox', err);
       }
       client.listMessages(-100, function (err, messages) {
         if (err) {
-          return logErr(err);
+          return logErr('list', err);
         }
+
         const gettingAllMails = [];
         _.forEach(messages, function (message) {
-          if (_.contains(message.flags, '\\Seen')) {
+          if (!_.contains(message.title, 'venta de')) {
             return;
           }
-
-          client.deleteMessage(message.UID, function (err) {
-            if (err) {
-              return logErr(err);
-            }
-          });
 
           const stream = client.createMessageStream(message.UID);
           const gettingContent = streamToString(stream)
@@ -154,7 +149,7 @@ const connectAndWriteSheet = function (sheetName) {
               headers: ['Local', 'Venta']
             }, function (err, sheet) {
               if (err) {
-                return logErr(err);
+                return logErr('addWorksheet', err);
               }
 
               const row = {};
@@ -162,13 +157,28 @@ const connectAndWriteSheet = function (sheetName) {
                 const addingRow = new Promise(function (resolve, reject) {
                   sheet.addRow(row, function (err, addedRow) {
                     if (err) {
-                      logErr(err);
+                      logErr('addRow', err);
                     }
+
                     resolve(addedRow);
                   });
                 });
 
                 return addingRow;
+              };
+
+              const deleteMessage = function (uid) {
+                const deletingMessage = new Promise(function (resolve, reject) {
+                  client.deleteMessage(uid, function (err) {
+                    if (err) {
+                      logErr('delete', err);
+                    }
+
+                    resolve(uid);
+                  });
+                });
+
+                return deletingMessage;
               };
 
               let promiseChain = Promise.resolve();
@@ -188,15 +198,25 @@ const connectAndWriteSheet = function (sheetName) {
 
               promiseChain.then(function () {
                 console.log(`Filas agregadas para "${sheetName}"`);
+                console.log('Borrando correos...');
+                let deletingMessages = Promise.resolve();
+                _.forEach(messages, function (message) {
+                  deletingMessages = deletingMessages.then(function () {
+                    return deleteMessage(message.UID);
+                  });
+                });
+
+                deletingMessages.then(function () {
+                  console.log('Correos borrados');
+                  client.close();
+                });
               });
             });
           });
-
-          client.close();
         })
 
         .catch(function (err) {
-          logErr(err);
+          logErr('parse', err);
           client.close();
         });
       });
