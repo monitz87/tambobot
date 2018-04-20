@@ -1,0 +1,18 @@
+{
+  "name": "tambobot",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Jeremías Díaz Cordara <monitz87@gmail.com>",
+  "license": "ISC",
+  "dependencies": {
+    "google-spreadsheet": "^2.0.4",
+    "inbox": "^1.1.59",
+    "later": "^1.2.0",
+    "moment": "^2.22.1",
+    "underscore": "^1.8.3"
+  }
+}
