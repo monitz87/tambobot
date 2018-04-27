@@ -41,7 +41,7 @@ later.date.UTC();
 
 const monThroughThu = later.parse.text('at 10:00 am on Fri');
 const weekend = later.parse.text('at 10:00 am on Mon');
-const testSched = later.parse.text('every 2 minutes');
+const testSched = later.parse.text('every 5 seconds');
 
 const connectAndWriteSheet = function (sheetName) {
   const logErr = function (type, err) {
@@ -92,7 +92,7 @@ const connectAndWriteSheet = function (sheetName) {
 
         const gettingAllMails = [];
         _.forEach(messages, function (message) {
-          if (!_.contains(message.title, 'venta de')) {
+          if (!message.title.includes('venta de')) {
             return;
           }
 
@@ -103,6 +103,7 @@ const connectAndWriteSheet = function (sheetName) {
             const code = codes[message.title.match(/(?:Fwd: )?(.*?) venta(:?.*?)/)[1]];
             const day = message.title.match(/venta de (.*?) /)[1];
             const amount = parseInt(res.match(/Resumen[\n\r][\n\r]Dia (?:.*?)[\n\r][\n\r]Venta (.*?)[\n\r][\n\r]/)[1].replace(/\./g, ''), 10);
+
             if (code === 'LN') {
               if (nacional[day]) {
                 nacional[day].push(amount);
@@ -189,6 +190,8 @@ const connectAndWriteSheet = function (sheetName) {
                   Venta: weeklySales[code]
                 };
               });
+
+              console.log('DATA: ', orderedData);
 
               _.forEach(orderedData, function (row) {
                 promiseChain = promiseChain.then(function () {
