@@ -21,7 +21,7 @@ const codes = {
   'Tambo Patio Bellavista Spa': 'TPB',
   'Panko Patio Bellavista Spa': 'PPB',
   'La Criolla Spa': 'LC',
-  'Panko Lastarria Spa': 'PL',
+  'Panko Lastarria Spa ': 'PL',
   'Soc De Inversiones Y Gastronomica Limo Sa': 'TL',
   'Zambo Bellavista Spa.': 'ZB',
   'Sociedad Gastronomica La Nacional Spa': 'LN'
@@ -100,9 +100,9 @@ const connectAndWriteSheet = function (sheetName) {
           const gettingContent = streamToString(stream)
 
           .then(function (res) {
-            const code = codes[message.title.match(/(?:Fwd: )?(.*?) venta(:?.*?)/)[1]];
+            const code = codes[message.title.match(/(?:Fwd: )?(.*?) venta(?:.*?)/)[1]];
+            const amount = parseInt(message.title.match(/venta de (?:.*?) (.*)/)[1].replace(/\./g, ''), 10);
             const day = message.title.match(/venta de (.*?) /)[1];
-            const amount = parseInt(res.match(/Resumen[\n\r][\n\r]Dia (?:.*?)[\n\r][\n\r]Venta (.*?)[\n\r][\n\r]/)[1].replace(/\./g, ''), 10);
 
             if (code === 'LN') {
               if (nacional[day]) {
@@ -204,6 +204,8 @@ const connectAndWriteSheet = function (sheetName) {
                 console.log('Borrando correos...');
                 let deletingMessages = Promise.resolve();
                 _.forEach(messages, function (message) {
+                  const day = message.title.match(/venta de (.*?) /)[1];
+
                   deletingMessages = deletingMessages.then(function () {
                     return deleteMessage(message.UID);
                   });
@@ -238,5 +240,5 @@ later.setInterval(function () {
 }, weekend);
 
 // later.setTimeout(function () {
-//   connectAndWriteSheet(`L-J ${moment.utc().subtract(3, 'h').format('DD/MM/YYYY')}`)
+//   connectAndWriteSheet(`FDS ${moment.utc().subtract(3, 'h').format('DD/MM/YYYY')}`)
 // }, testSched);
